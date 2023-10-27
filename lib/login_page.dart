@@ -6,15 +6,17 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:ict/pages/faculty_screen.dart';
-import 'package:ict/pages/hod_screen.dart';
-import 'package:ict/pages/student_screen.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:ict/screens/faculty_screen.dart';
+import 'package:ict/screens/hod_screen.dart';
+import 'package:ict/screens/student_screen.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
-
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
@@ -108,7 +110,7 @@ class _LoginPageState extends State<LoginPage> {
                       isVisible = !isVisible;
                       setState((){});
                     },
-                    child: Icon(isVisible? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                    child: Icon(isVisible? Icons.visibility_off_rounded : Icons.visibility_rounded,
                       color: Color(0xFF0098B5),
                       size: 20,
                     ),
@@ -137,33 +139,32 @@ class _LoginPageState extends State<LoginPage> {
                             .doc(user!.uid)
                             .get()
                             .then((DocumentSnapshot ds)
-                            {
+                            async {
                               if (ds.get('rool') == 'hod') {
+                                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                await prefs.setBool("isLoginHod", true);
                                 _btnController.success();
-                                Timer(Duration(seconds: 1), () {
-                                  Navigator.push(
-                                      context, PageTransition(HodScreen()));
-                                });
+                                Get.off(HodScreen(),curve: Curves.bounceInOut,duration: Duration(seconds: 1));
                                 Timer(Duration(seconds: 2), () {
                                   _btnController.reset();
                                 });
                               }
                               else if (ds.get('rool') == 'student')
                                 {
+                                  final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                  await prefs.setBool("isLoginStd", true);
                                   _btnController.success();
-                                  Timer(Duration(seconds: 1), () {
-                                    Navigator.push(context,PageTransition(StudentScreen()));
-                                  });
+                                  Get.off(StudentScreen(),curve: Curves.bounceInOut,duration: Duration(seconds: 1));
                                   Timer(Duration(seconds: 2), () {
                                     _btnController.reset();
                                   });
                                 }
                               else if (ds.get('rool') == 'faculty')
                               {
+                                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                await prefs.setBool("isLoginFac", true);
                                 _btnController.success();
-                                Timer(Duration(seconds: 1), () {
-                                  Navigator.push(context,PageTransition(FacultyScreen()));
-                                });
+                                Get.off(FacultyScreen(),curve: Curves.bounceInOut,duration: Duration(seconds: 1));
                                 Timer(Duration(seconds: 2), () {
                                   _btnController.reset();
                                 });

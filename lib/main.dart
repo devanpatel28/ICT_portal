@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:ict/pages/faculty_screen.dart';
-import 'package:ict/pages/hod_screen.dart';
-import 'package:ict/pages/student_screen.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:ict/screens/faculty_screen.dart';
+import 'package:ict/screens/hod_screen.dart';
+import 'package:ict/screens/splash_screen.dart';
+import 'package:ict/screens/student_screen.dart';
 import 'login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase/firebase_options.dart';
@@ -20,16 +22,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      routes: {
-        'login': (context) => LoginPage(),
-        'student': (context) => StudentScreen(),
-        'hod': (context) => HodScreen(),
-        'faculty': (context) => FacultyScreen(),
-
-      },
-      initialRoute: 'login',
+      home: SplashScreen(),
     );
   }
 }
