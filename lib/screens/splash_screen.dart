@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ict/login_page.dart';
 import 'package:ict/screens/faculty_screen.dart';
-import 'package:ict/screens/hod_screen.dart';
 import 'package:ict/screens/student_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 class SplashScreen extends StatefulWidget {
@@ -28,10 +27,6 @@ class _SplashScreenState extends State<SplashScreen> {
       if(isLoginStd)
       {
         Get.off(StudentScreen(),duration: Duration(seconds: 2),curve: Curves.easeInOut);
-      }
-      else if(isLoginHod)
-      {
-        Get.off(HodScreen(),duration: Duration(seconds: 2),curve: Curves.easeInOut);
       }
       else if(isLoginFac)
         {
