@@ -9,6 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:ict/screens/faculty_screen.dart';
+import 'package:ict/screens/hod_screen.dart';
 import 'package:ict/screens/student_screen.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -129,8 +130,8 @@ class _LoginPageState extends State<LoginPage> {
                   onPressed: () async {
                   try {
                     final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-                        email: email,
-                        password: password
+                        email: email.trim(),
+                        password: password.trim()
                     );
                         User? user = FirebaseAuth.instance.currentUser;
                         var kk = FirebaseFirestore.instance
@@ -149,6 +150,16 @@ class _LoginPageState extends State<LoginPage> {
                                     _btnController.reset();
                                   });
                                 }
+                              else if (ds.get('rool') == 'hod')
+                              {
+                                final SharedPreferences prefs = await SharedPreferences.getInstance();
+                                await prefs.setBool("isLoginHod", true);
+                                _btnController.success();
+                                Get.off(HodScreen(),curve: Curves.bounceInOut,duration: Duration(seconds: 1));
+                                Timer(Duration(seconds: 2), () {
+                                  _btnController.reset();
+                                });
+                              }
                               else if (ds.get('rool') == 'faculty')
                               {
                                 final SharedPreferences prefs = await SharedPreferences.getInstance();

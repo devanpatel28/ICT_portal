@@ -6,6 +6,8 @@ import 'package:ict/login_page.dart';
 import 'package:ict/screens/faculty_screen.dart';
 import 'package:ict/screens/student_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'hod_screen.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -32,6 +34,10 @@ class _SplashScreenState extends State<SplashScreen> {
         {
           Get.off(FacultyScreen(),duration: Duration(seconds: 2),curve: Curves.easeInOut);
         }
+      else if(isLoginHod)
+      {
+        Get.off(HodScreen(),duration: Duration(seconds: 2),curve: Curves.easeInOut);
+      }
       else
         {
           Get.off(LoginPage(),duration: Duration(seconds: 2),curve: Curves.easeInOut);

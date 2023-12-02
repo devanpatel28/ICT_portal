@@ -7,10 +7,12 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:ict/helpers/contents.dart';
 import 'package:ict/screens/leave_applicaion.dart';
+import 'package:ict/screens/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../firebase/firebase_operation.dart';
 import '../helpers/size.dart';
 import '../login_page.dart';
+
 class StudentScreen extends StatefulWidget {
   const StudentScreen({super.key});
 
@@ -19,29 +21,98 @@ class StudentScreen extends StatefulWidget {
 }
 
 class _StudentScreenState extends State<StudentScreen> {
-  Stream<QuerySnapshot> collection = FirebaseOperations.fetchTransactions();
-  @override
-  late int sEnroll,sSem;
-  late String sName,sClass;
-
+   String uID="",sName="",sClass="",sSem="",sEnroll="",profileImageUrl = "";
   final User? user = FirebaseAuth.instance.currentUser;
-  Widget build(BuildContext context) {
+  late SharedPreferences prefs;
 
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+    });
+    initSharedPrefs();
+  }
+   String _getGreeting() {
+     final now = DateTime.now();
+     final hour = now.hour;
+
+     if (hour < 12) {
+       return "Good Morning !";
+     } else if (hour < 17) {
+       return "Good Afternoon !";
+     } else if (hour < 21) {
+       return "Good Evening !";
+     } else {
+       return "Good Night !";
+     }
+   }
+
+   void initSharedPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+    if (!prefs.containsKey("userID")||prefs.getString("userID")!.isEmpty) {
+      uID = user!.uid;
+      await prefs.setString("userID", uID);
+    }
+    else {
+      uID = prefs.getString("userID")!;
+    }
+    getUserData();
+  }
+
+  void getUserData() async {
+    final docRef = FirebaseFirestore.instance.collection('user').doc(uID);
+    final docSnapshot = await docRef.get();
+    if (docSnapshot.exists) {
+      final Map<String, dynamic>? data = docSnapshot.data();
+      setState(() {
+        sName = data?['name'];
+        sClass = data?['class'];
+        sSem = data!['sem'].toString();
+        sEnroll = data?['enroll'];
+        profileImageUrl = data?['profileImageUrl'];
+      });
+    }
+  }
+
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Dashboard",style: TextStyle(color: muColor,fontSize: getSize(context,2.3))),
-        elevation:1,
-        backgroundColor: Colors.white,
+        title: Text("Dashboard", style: TextStyle(color: muColor, fontSize: getSize(context, 2.3))),
         actions: [
-          IconButton(onPressed: (){},icon: Icon(Icons.person,color: muColor),)
+          Padding(
+            padding: const EdgeInsets.only(right: 15),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.grey[300],
+                ),
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.grey[300],
+                  backgroundImage: profileImageUrl.isNotEmpty
+                      ? NetworkImage(profileImageUrl)
+                      : null,
+                  child: profileImageUrl.isEmpty
+                      ? Icon(
+                    Icons.person,
+                    size: 40,
+                    color: muColor,
+                  ) : null,
+                ),
+              ],
+            )
+          ),
         ],
-      ),
+        elevation: 1,
+        backgroundColor: Colors.white,
 
+      ),
       body: SafeArea(
         child: StreamBuilder(
-          stream: collection,
-          builder: (context, Snapshot)
-          {
+          stream: FirebaseOperations.fetchTransactions(),
+          builder: (context, Snapshot) {
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: Center(
@@ -49,52 +120,111 @@ class _StudentScreenState extends State<StudentScreen> {
                   children: [
                     Container(
                       width: getWidth(context, 0.9),
-                      height: getHeight(context,0.1),
+                      height: getHeight(context, 0.06),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         color: Colors.grey[200],
                       ),
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text("Hello, Devan"),
-                              Text("SEM 5 TK1"),
-                            ],
-                          ),
-                        ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(text: "Hello, ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
+                                  TextSpan(text: "$sName", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: muColor,fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ),
+                            Text(_getGreeting(),style: TextStyle(fontFamily: "main",color: muColor,fontStyle: FontStyle.italic),
+                            ),
+                          ],
+                        )
+
                       ),
                     ),
-                    SizedBox(height: getHeight(context, 0.05),),
+                    SizedBox(height: getHeight(context, 0.05)),
                     Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          getMainIcon(context, IconButton(onPressed: (){Get.to(LeaveApplication());},
-                              icon: FaIcon(FontAwesomeIcons.notesMedical,size: getSize(context, 5),color: muColor,))," Apply Leave"),
-                          getMainIcon(context, IconButton(onPressed: (){Get.to(LeaveApplication());},
-                              icon: FaIcon(FontAwesomeIcons.idCard,size: getSize(context, 5),color: muColor,)),"Profile"),
-                          getMainIcon(context, IconButton(onPressed: (){Get.to(LeaveApplication());},
-                              icon: Icon(Icons.calendar_month_outlined,size: getSize(context, 6),color: muColor,)),"Timetable"),
-                        ],
-                      ),
-                      SizedBox(height: getHeight(context, 0.03),),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          getMainIcon(context, IconButton(onPressed: (){Get.to(LeaveApplication());},
-                              icon: Icon(Icons.developer_board_outlined,size: getSize(context, 6),color: muColor,)),"Notice Board"),
-                          getMainIcon(context, IconButton(onPressed: (){Get.to(LeaveApplication());},
-                              icon: Icon(Icons.quiz_outlined,size: getSize(context, 6),color: muColor,)),"Quiz"),
-                          getMainIcon(context, IconButton(onPressed: (){Get.to(LeaveApplication());},
-                              icon: Icon(Icons.fact_check_outlined,size: getSize(context, 6),color: muColor,)),"Attendance"),
-                        ],
-                      ),
-                    ],)
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            getMainIcon(
+                              context,
+                              IconButton(
+                                onPressed: () {
+                                  Get.to(LeaveApplication());
+                                },
+                                icon: FaIcon(FontAwesomeIcons.notesMedical,
+                                    size: getSize(context, 5), color: muColor),
+                              ),
+                              "Apply Leave",
+                            ),
+                            getMainIcon(
+                              context,
+                              IconButton(
+                                onPressed: () {
+                                  Get.to(ProfilePage());
+                                },
+                                icon: FaIcon(FontAwesomeIcons.idCard,
+                                    size: getSize(context, 5), color: muColor),
+                              ),"Profile",
+                            ),
+                            getMainIcon(
+                                context,
+                                IconButton(
+                                  onPressed: () {
+                                    Get.to(LeaveApplication());
+                                  },
+                                  icon: Icon(Icons.calendar_month_outlined,
+                                      size: getSize(context, 6),
+                                      color: muColor),
+                                ),"Timetable"),
+                          ],
+                        ),
+                        SizedBox(height: getHeight(context, 0.03)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            getMainIcon(
+                              context,
+                              IconButton(
+                                onPressed: () {
+                                  Get.to(LeaveApplication());
+                                },
+                                icon: Icon(Icons.developer_board_outlined,
+                                    size: getSize(context, 6), color: muColor),
+                              ),
+                              "Notice Board",
+                            ),
+                            getMainIcon(
+                                context,
+                                IconButton(
+                                  onPressed: () {
+                                    Get.to(LeaveApplication());
+                                  },
+                                  icon: Icon(Icons.quiz_outlined,
+                                      size: getSize(context, 6),
+                                      color: muColor),
+                                ),
+                                "Quiz"),
+                            getMainIcon(
+                              context,
+                              IconButton(
+                                onPressed: () {
+                                  Get.to(LeaveApplication());
+                                },
+                                icon: Icon(Icons.fact_check_outlined,
+                                    size: getSize(context, 6), color: muColor),
+                              ),
+                              "Attendance",
+                            ),
+                          ],
+                        ),
+                      ],
+                    )
                   ],
                 ),
               ),
