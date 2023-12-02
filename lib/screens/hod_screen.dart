@@ -13,15 +13,15 @@ import '../firebase/firebase_operation.dart';
 import '../helpers/size.dart';
 import '../login_page.dart';
 
-class StudentScreen extends StatefulWidget {
-  const StudentScreen({super.key});
+class HodScreen extends StatefulWidget {
+  const HodScreen({super.key});
 
   @override
-  State<StudentScreen> createState() => _StudentScreenState();
+  State<HodScreen> createState() => _HodScreenState();
 }
 
-class _StudentScreenState extends State<StudentScreen> {
-   String uID="",sName="",sClass="",sSem="",sEnroll="";
+class _HodScreenState extends State<HodScreen> {
+  String uID="",hName="";
   final User? user = FirebaseAuth.instance.currentUser;
   late SharedPreferences prefs;
 
@@ -30,22 +30,22 @@ class _StudentScreenState extends State<StudentScreen> {
     super.initState();
     initSharedPrefs();
   }
-   String _getGreeting() {
-     final now = DateTime.now();
-     final hour = now.hour;
+  String _getGreeting() {
+    final now = DateTime.now();
+    final hour = now.hour;
 
-     if (hour < 12) {
-       return "Good Morning !";
-     } else if (hour < 17) {
-       return "Good Afternoon !";
-     } else if (hour < 21) {
-       return "Good Evening !";
-     } else {
-       return "Good Night !";
-     }
-   }
+    if (hour < 12) {
+      return "Good Morning !";
+    } else if (hour < 17) {
+      return "Good Afternoon !";
+    } else if (hour < 21) {
+      return "Good Evening !";
+    } else {
+      return "Good Night !";
+    }
+  }
 
-   void initSharedPrefs() async {
+  void initSharedPrefs() async {
     prefs = await SharedPreferences.getInstance();
     if (!prefs.containsKey("userID")||prefs.getString("userID")!.isEmpty) {
       uID = user!.uid;
@@ -63,10 +63,7 @@ class _StudentScreenState extends State<StudentScreen> {
     if (docSnapshot.exists) {
       final Map<String, dynamic>? data = docSnapshot.data();
       setState(() {
-        sName = data?['name'];
-        sClass = data?['class'];
-        sSem = data!['sem'].toString();
-        sEnroll = data?['enroll'];
+        hName = data?['name'];
       });
     }
   }
@@ -74,7 +71,8 @@ class _StudentScreenState extends State<StudentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Dashboard", style: TextStyle(color: muColor, fontSize: getSize(context, 2.3))),
+        title: Text("HOD Dashboard", style: TextStyle(color: muColor, fontSize: getSize(context, 2.3))),
+        centerTitle: true,
         elevation: 1,
         backgroundColor: Colors.white,
 
@@ -96,22 +94,22 @@ class _StudentScreenState extends State<StudentScreen> {
                         color: Colors.grey[200],
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(text: "Hello, ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
-                                  TextSpan(text: "$sName", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: muColor,fontWeight: FontWeight.bold)),
-                                ],
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(text: "Hello, ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
+                                    TextSpan(text: "$hName", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: muColor,fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
                               ),
-                            ),
-                            Text(_getGreeting(),style: TextStyle(fontFamily: "main",color: muColor,fontStyle: FontStyle.italic),
-                            ),
-                          ],
-                        )
+                              Text(_getGreeting(),style: TextStyle(fontFamily: "main",color: muColor,fontStyle: FontStyle.italic),
+                              ),
+                            ],
+                          )
 
                       ),
                     ),
@@ -127,47 +125,10 @@ class _StudentScreenState extends State<StudentScreen> {
                                 onPressed: () {
                                   Get.to(LeaveApplication());
                                 },
-                                icon: FaIcon(FontAwesomeIcons.notesMedical,
-                                    size: getSize(context, 5), color: muColor),
-                              ),
-                              "Apply Leave",
-                            ),
-                            getMainIcon(
-                              context,
-                              IconButton(
-                                onPressed: () {
-                                  Get.to(ProfilePage());
-                                },
-                                icon: FaIcon(FontAwesomeIcons.idCard,
-                                    size: getSize(context, 5), color: muColor),
-                              ),"Profile",
-                            ),
-                            getMainIcon(
-                                context,
-                                IconButton(
-                                  onPressed: () {
-                                    Get.to(LeaveApplication());
-                                  },
-                                  icon: Icon(Icons.calendar_month_outlined,
-                                      size: getSize(context, 6),
-                                      color: muColor),
-                                ),"Timetable"),
-                          ],
-                        ),
-                        SizedBox(height: getHeight(context, 0.03)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            getMainIcon(
-                              context,
-                              IconButton(
-                                onPressed: () {
-                                  Get.to(LeaveApplication());
-                                },
-                                icon: Icon(Icons.developer_board_outlined,
+                                icon: Icon(Icons.person_add_alt_1_outlined,
                                     size: getSize(context, 6), color: muColor),
                               ),
-                              "Notice Board",
+                              "Add Student",
                             ),
                             getMainIcon(
                                 context,
@@ -191,6 +152,42 @@ class _StudentScreenState extends State<StudentScreen> {
                               ),
                               "Attendance",
                             ),
+                          ],
+                        ),
+                        SizedBox(height: getHeight(context, 0.03)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            getMainIcon(
+                              context,
+                              IconButton(
+                                onPressed: () {
+                                  Get.to(LeaveApplication());
+                                },
+                                icon: FaIcon(FontAwesomeIcons.notesMedical,
+                                    size: getSize(context, 5), color: muColor),
+                              ), "    Leave\nApproval",
+                            ),
+                            getMainIcon(
+                              context,
+                              IconButton(
+                                onPressed: () {
+                                  Get.to(ProfilePage());
+                                },
+                                icon: FaIcon(FontAwesomeIcons.idCard,
+                                    size: getSize(context, 5), color: muColor),
+                              ),"Students\n ",
+                            ),
+                            getMainIcon(
+                                context,
+                                IconButton(
+                                  onPressed: () {
+                                    Get.to(LeaveApplication());
+                                  },
+                                  icon: Icon(Icons.calendar_month_outlined,
+                                      size: getSize(context, 6),
+                                      color: muColor),
+                                ),"Timetable\n "),
                           ],
                         ),
                       ],

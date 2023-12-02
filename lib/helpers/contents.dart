@@ -16,7 +16,7 @@ getMainIcon(context,IconButton ib,String str)
         child: ib,
       ),
       SizedBox(height: 5,),
-      Text(str,style: TextStyle(fontFamily: "Main",color: muColor),)
+      Text(str,style: TextStyle(fontFamily: "Main",color: Colors.black),)
     ],
   );
 }
