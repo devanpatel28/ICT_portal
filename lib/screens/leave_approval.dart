@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:ict/helpers/size.dart';
 
 import '../helpers/contents.dart';
-import 'leave_view.dart';
 
 class LeaveApprovalPage extends StatefulWidget {
   const LeaveApprovalPage({Key? key}) : super(key: key);
@@ -16,6 +15,7 @@ class LeaveApprovalPage extends StatefulWidget {
 class _LeaveApprovalPageState extends State<LeaveApprovalPage> {
   final _firestore = FirebaseFirestore.instance;
   final transformationController = TransformationController();
+  String _searchQuery = "";
 
   // Leave applications list
   final _leaveApplications = <LeaveApplication>[].obs;
@@ -34,9 +34,9 @@ class _LeaveApprovalPageState extends State<LeaveApprovalPage> {
       for (var doc in snapshot.docs) {
         final application = LeaveApplication.fromFirestore(doc);
         if (application.status == "pending") {
-          _leaveApplications.insert(0, application);
+          _leaveApplications.insert(_leaveApplications.length-1, application);
         } else if (application.status == "approve") {
-          _leaveApplications.insert(1,application);
+          _leaveApplications.insert(_leaveApplications.length,application);
         } else {
           _leaveApplications.addAll([application]);
         }
@@ -126,87 +126,111 @@ class _LeaveApprovalPageState extends State<LeaveApprovalPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      appBar: AppBar(title: Text("Leave Approvals")),
+      appBar: AppBar(title: Text("Leave Approvals"),centerTitle: true,backgroundColor: muColor),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Obx(
-              () => ListView.builder(
-            itemCount: _leaveApplications.length,
-            itemBuilder: (context, index) {
-              final leave = _leaveApplications[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2,vertical: 3),
-                child: Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(5.0),
-                    child: ListTile(
-                      onTap: () => _showStudentNamePopup(leave),
-                      title: Text(leave.studentName,style: TextStyle(color: Colors.black, fontFamily: "main")),
-                      subtitle: Column(
-                        children: [
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: Text(
-                              leave.date,
-                              style: TextStyle(color: muColor, fontFamily: "main"),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: TextField(
+                decoration: InputDecoration(hintText: 'Search Student Name'),
+                onChanged: (value) => setState(() => _searchQuery = value),
+              ),
+            ),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestore.collection('leave').snapshots(),
+                builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                        return Center(child: CircularProgressIndicator());
+                    }
+                    return ListView.builder(
+                  itemCount: _leaveApplications.length,
+                  itemBuilder: (context, index) {
+                    final leave = _leaveApplications[index];
+                    if (!leave.studentName.toLowerCase().contains(_searchQuery.toLowerCase())) {
+                      return SizedBox.shrink(); // Hide student if not matching
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2,vertical: 3),
+                      child: Card(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(5.0),
+                          child: ListTile(
+                            onTap: () => _showStudentNamePopup(leave),
+                            title: Text(leave.studentName,style: TextStyle(color: Colors.black, fontFamily: "main")),
+                            subtitle: Column(
+                              children: [
+                                Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    leave.date,
+                                    style: TextStyle(color: muColor, fontFamily: "main"),
+                                  ),
+                                ),
+                                SizedBox(height: 10,child: Divider(thickness: 1,color: Colors.grey,)),
+                                Align(
+                                    alignment: Alignment.topLeft,
+                                    child: RichText(
+                                      text: TextSpan(
+                                          children: [
+                                            TextSpan(text: "Reason : ", style: TextStyle(fontFamily:"main",fontWeight:FontWeight.bold,color: Colors.black,fontSize: getSize(context, 2.2)),),
+                                            TextSpan(text: leave.subject, style: TextStyle(color: Colors.blueGrey ,fontSize: getSize(context, 2.1)),),
+                                          ]
+                                      ),
+                                    )
+                                ),
+                                SizedBox(height: 10),
+                                Align(
+                                    alignment: Alignment.topLeft,
+                                    child: RichText(
+                                      text: TextSpan(
+                                          children: [
+                                            TextSpan(text: "Body : \n", style: TextStyle(fontFamily:"main",fontWeight:FontWeight.bold,color: Colors.black,fontSize: getSize(context, 2.2)),),
+                                            TextSpan(text: leave.body, style: TextStyle(fontFamily:"main",color: Colors.blueGrey ,fontSize: getSize(context, 2.2)),),
+                                          ]
+                                      ),
+                                    )
+                                ),
+                                SizedBox(height: 10),
+                                leave.attachID.isNotEmpty?
+                                Column(
+                                  children: [
+                                    Align(alignment:Alignment.topLeft,
+                                        child: RichText(text: TextSpan(text: "Attachments : ", style: TextStyle(fontFamily:"main",fontWeight:FontWeight.bold,color: Colors.black,fontSize: getSize(context, 2.2)),),)),
+                                    SizedBox(height: 5),
+                                    GestureDetector(
+                                        onTap: () => _zoomImage(leave.attachID), // Define _zoomImage function below
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(15.0), // Adjust as desired
+                                          child: Image(
+                                            image: NetworkImage(leave.attachID),
+                                          ),
+                                        )
+                                    ),
+                                  ],
+                                )
+                                    :SizedBox()
+                              ],
+                            ),
+                            trailing: RichText(
+                              text: TextSpan(
+                                  children: [
+                                    TextSpan(text: "   Status\n", style: TextStyle(fontFamily:"main",fontWeight:FontWeight.bold,color: Colors.black,fontSize: getSize(context, 2.2)),),
+                                    TextSpan(text: leave.status.toUpperCase(), style: TextStyle(fontFamily:"main",color: leave.status == "approve" ? Colors.green : leave.status == "decline" ? Colors.red : Colors.orange,fontSize: getSize(context, 2.1)),),
+                                  ]
+                              ),
                             ),
                           ),
-                          SizedBox(height: 10,child: Divider(thickness: 1,color: Colors.grey,)),
-                          Align(
-                              alignment: Alignment.topLeft,
-                              child: RichText(
-                                text: TextSpan(
-                                    children: [
-                                      TextSpan(text: "Reason : ", style: TextStyle(fontFamily:"main",fontWeight:FontWeight.bold,color: Colors.black,fontSize: getSize(context, 2.2)),),
-                                      TextSpan(text: leave.subject, style: TextStyle(color: Colors.blueGrey ,fontSize: getSize(context, 2.1)),),
-                                    ]
-                                ),
-                              )
-                          ),
-                          SizedBox(height: 10),
-                          Align(
-                              alignment: Alignment.topLeft,
-                              child: RichText(
-                                text: TextSpan(
-                                    children: [
-                                      TextSpan(text: "Body : \n", style: TextStyle(fontFamily:"main",fontWeight:FontWeight.bold,color: Colors.black,fontSize: getSize(context, 2.2)),),
-                                      TextSpan(text: leave.body, style: TextStyle(fontFamily:"main",color: Colors.blueGrey ,fontSize: getSize(context, 2.2)),),
-                                    ]
-                                ),
-                              )
-                          ),
-                          SizedBox(height: 10),
-                          Align(alignment:Alignment.topLeft,
-                              child: RichText(text: TextSpan(text: "Attachments : ", style: TextStyle(fontFamily:"main",fontWeight:FontWeight.bold,color: Colors.black,fontSize: getSize(context, 2.2)),),)),
-                          SizedBox(height: 5),
-                          leave.attachID.isNotEmpty?
-                          GestureDetector(
-                              onTap: () => _zoomImage(leave.attachID), // Define _zoomImage function below
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(15.0), // Adjust as desired
-                                child: Image(
-                                  image: NetworkImage(leave.attachID),
-                                ),
-                              )
-                          )
-                              :SizedBox()
-                        ],
-                      ),
-                      trailing: RichText(
-                        text: TextSpan(
-                            children: [
-                              TextSpan(text: "   Status\n", style: TextStyle(fontFamily:"main",fontWeight:FontWeight.bold,color: Colors.black,fontSize: getSize(context, 2.2)),),
-                              TextSpan(text: leave.status.toUpperCase(), style: TextStyle(fontFamily:"main",color: leave.status == "approve" ? Colors.green : leave.status == "decline" ? Colors.red : Colors.orange,fontSize: getSize(context, 2.1)),),
-                            ]
                         ),
                       ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
+                    );
+                  },);}
+              ),
+            ),
+          ],
         ),
       ),
     );
