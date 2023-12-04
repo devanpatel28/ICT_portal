@@ -9,6 +9,7 @@ import 'package:ict/helpers/contents.dart';
 import 'package:ict/screens/addStudent.dart';
 import 'package:ict/screens/all_Students.dart';
 import 'package:ict/screens/leave_applicaion.dart';
+import 'package:ict/screens/leave_approval.dart';
 import 'package:ict/screens/profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../firebase/firebase_operation.dart';
@@ -190,7 +191,7 @@ class _HodScreenState extends State<HodScreen> {
                               context,
                               IconButton(
                                 onPressed: () {
-                                  Get.to(LeaveApplication());
+                                  // Get.to(LeaveApplication());
                                 },
                                 icon: Icon(Icons.fact_check_outlined,
                                     size: getSize(context, 6), color: muColor),
@@ -207,7 +208,7 @@ class _HodScreenState extends State<HodScreen> {
                               context,
                               IconButton(
                                 onPressed: () {
-                                  Get.to(LeaveApplication());
+                                  Get.to(LeaveApprovalPage());
                                 },
                                 icon: FaIcon(FontAwesomeIcons.notesMedical,
                                     size: getSize(context, 5), color: muColor),
@@ -227,7 +228,7 @@ class _HodScreenState extends State<HodScreen> {
                                 context,
                                 IconButton(
                                   onPressed: () {
-                                    Get.to(LeaveApplication());
+                                    // Get.to(LeaveApplication());
                                   },
                                   icon: Icon(Icons.calendar_month_outlined,
                                       size: getSize(context, 6),

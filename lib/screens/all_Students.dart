@@ -70,7 +70,7 @@ class _AllStudentsPageState extends State<AllStudentsPage> {
                             IconButton(
                               icon: Icon(FontAwesomeIcons.whatsapp),
                               onPressed: () async {
-                                final url = 'https://wa.me/$mobile';
+                                final url = 'https://wa.me/+91$mobile';
                                 if (await canLaunch(url)) {
                                   launch(url);
                                 } else {

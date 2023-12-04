@@ -58,7 +58,7 @@ class _AddStudentState extends State<AddStudent> {
         sem,
         "student"
       );
-      Get.snackbar("Success",'Student added successfully!',backgroundColor: Colors.red,colorText: Colors.white);
+      Get.snackbar("Success",'Student added successfully!',backgroundColor: Colors.green,colorText: Colors.white);
       _formKey.currentState!.reset();
     }
     else

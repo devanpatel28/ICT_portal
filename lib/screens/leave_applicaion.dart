@@ -16,6 +16,8 @@ class LeaveApplication extends StatefulWidget {
 
   @override
   _LeaveApplicationState createState() => _LeaveApplicationState();
+
+  static fromFirestore(DocumentSnapshot<Object?> documentSnapshot) {}
 }
 
 class _LeaveApplicationState extends State<LeaveApplication> {
@@ -24,33 +26,34 @@ class _LeaveApplicationState extends State<LeaveApplication> {
   final _bodyController = TextEditingController();
   String _attachmentID = "";
   bool _isLoadingImage = false;
+  final user = FirebaseAuth.instance.currentUser;
+  String studentName = "";
+
 
   // Firebase Storage reference
   final _storage = FirebaseStorage.instance;
-  final User? user = FirebaseAuth.instance.currentUser;
   // Firestore reference
   final _firestore = FirebaseFirestore.instance;
 
   Future<void> submitApplication() async {
+    if (user != null) {
+      final docRef = FirebaseFirestore.instance.collection('user').doc(user?.uid);
+      final docSnapshot = await docRef.get();
+
+      if (docSnapshot.exists) {
+        final Map<String, dynamic>? data = docSnapshot.data();
+        studentName = "${data?['name']} ${data?['sname']}";
+      }
+    }
     // Validate form fields
     if (_subjectController.text.isEmpty || _bodyController.text.isEmpty) {
       Get.snackbar("Error", "Please fill all required fields!",backgroundColor: Colors.red,colorText: Colors.white);
       return;
     }
-
-    // Upload attachment if any
-    if (_attachmentID.isEmpty) {
-      try {
-        await _storage.ref().child('attachments/$_attachmentID').delete();
-      } catch (error) {
-        Get.snackbar("Error", "Failed to upload attachment!404",backgroundColor: Colors.red,colorText: Colors.white);
-        return;
-      }
-    }
-
     // Create new leave application document in Firestore
     await _firestore.collection('leave').add({
-      'studentID': user?.uid,
+      'studentID':user?.uid,
+      'studentName': studentName,
       'subject': _subjectController.text,
       'body': _bodyController.text,
       'attachmentID': _attachmentID,
@@ -63,7 +66,9 @@ class _LeaveApplicationState extends State<LeaveApplication> {
     // Reset form fields
     _subjectController.clear();
     _bodyController.clear();
-    _attachmentID = "";
+    setState(() {
+      _attachmentID = "";
+    });
   }
 
   Future<void> pickImageFromGallery() async {
