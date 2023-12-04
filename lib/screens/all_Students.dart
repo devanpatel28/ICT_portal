@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:ict/helpers/size.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -74,11 +76,7 @@ class _AllStudentsPageState extends State<AllStudentsPage> {
                                 if (await canLaunch(url)) {
                                   launch(url);
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('WhatsApp not installed'),
-                                    ),
-                                  );
+                                  Get.snackbar("Error",'WhatsApp not installed',backgroundColor: Colors.red,colorText: Colors.white);
                                 }
                               },
                             ),
