@@ -129,12 +129,12 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _btnController,
                   onPressed: () async {
                   try {
-                    final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                    await FirebaseAuth.instance.signInWithEmailAndPassword(
                         email: email.trim(),
                         password: password.trim()
                     );
                         User? user = FirebaseAuth.instance.currentUser;
-                        var kk = FirebaseFirestore.instance
+                        FirebaseFirestore.instance
                             .collection('user')
                             .doc(user!.uid)
                             .get()
@@ -182,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                             content: Text('User Not Found ',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red,fontSize: 20)),
                             actions: <Widget>[
                               TextButton(
-                                onPressed: () => Navigator.pop(context),
+                                onPressed: () => Get.back(),
                                 child: const Text('OK'),
                               ),
                             ],
@@ -199,7 +199,7 @@ class _LoginPageState extends State<LoginPage> {
                           content: Text('Wrong Password',textAlign: TextAlign.center,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.red,fontSize: 20)),
                           actions: <Widget>[
                             TextButton(
-                              onPressed: () => Navigator.pop(context),
+                              onPressed: () => Get.back(),
                               child: const Text('OK'),
                             ),
                           ],
@@ -216,6 +216,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Text("LOGIN",style: TextStyle(
                         fontSize: 15,
                         fontFamily: "Main",
+                        color: Colors.white,
                         fontWeight: FontWeight.bold)),
                   color: Color(0xFF0098B5),
                   borderRadius: brRad,

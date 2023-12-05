@@ -9,6 +9,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:ict/helpers/contents.dart';
+import 'package:ict/screens/faculty_screen.dart';
+import 'package:ict/screens/hod_screen.dart';
 import 'package:ict/screens/leave_applicaion.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
@@ -18,24 +20,20 @@ import '../firebase/firebase_operation.dart';
 import '../helpers/size.dart';
 import '../login_page.dart';
 
-class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+class ProfessorProfilePage extends StatefulWidget {
+  const ProfessorProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  State<ProfessorProfilePage> createState() => _ProfessorProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
-  String uID = "",
-      sName = "",
-      sClass = "",
-      sSem = "",
-      sEnroll = "",
-      sEmail = "",
-      sSname = "",
-      sLab = "",
-      sMob = "",
-      sGR = "",
+class _ProfessorProfilePageState extends State<ProfessorProfilePage> {
+  String hID = "",
+      hName = "",
+      hSname="",
+      hEmail = "",
+      hMob = "",
+      hrool="",
       profileImageUrl = "";
   final User? user = FirebaseAuth.instance.currentUser;
   late SharedPreferences prefs;
@@ -44,8 +42,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
-    super.initState();
     initSharedPrefs();
+    super.initState();
   }
   Future<void> requestStoragePermission() async {
     if (await Permission.storage.request().isGranted) {
@@ -58,8 +56,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void initSharedPrefs() async {
     prefs = await SharedPreferences.getInstance();
-    uID = prefs.getString("userID")!;
-    getUserData();
+    hID = prefs.getString("userID")!;
+    print(hID);
+    setState(() {
+      getUserData();
+    });
   }
 // Function to show popup for old password
   Future<String?> showOldPasswordPopup(BuildContext context) async {
@@ -67,7 +68,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Enter Old Password"),
+        title: Text("Enter Old Password",style: TextStyle(fontFamily: "Main",fontSize:getSize(context, 2.5),fontWeight: FontWeight.bold)),
         content: TextField(
           controller: oldPasswordController,
           obscureText: true,
@@ -78,11 +79,11 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Get.back(),
             child: Text("Cancel"),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, oldPasswordController.text),
+            onPressed: () => Get.back(result: oldPasswordController.text),
             child: Text("Submit"),
           ),
         ],
@@ -96,7 +97,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Enter New Password"),
+        title: Text("Enter New Password",style: TextStyle(fontFamily: "Main",fontSize:getSize(context, 2.5),fontWeight: FontWeight.bold)),
         content: TextField(
           controller: newPasswordController,
           obscureText: true,
@@ -151,20 +152,16 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void getUserData() async {
-    final docRef = FirebaseFirestore.instance.collection('user').doc(uID);
+    final docRef = FirebaseFirestore.instance.collection('user').doc(hID);
     final docSnapshot = await docRef.get();
     if (docSnapshot.exists) {
       final Map<String, dynamic>? data = docSnapshot.data();
       setState(() {
-        sName = data?['name'];
-        sClass = data?['class'];
-        sSname = data?['sname'];
-        sEmail = data?['email'];
-        sLab = data?['lab'];
-        sMob = data?['mobile'];
-        sSem = data!['sem'].toString();
-        sEnroll = data?['enroll'];
-        sGR = data?['gr'];
+        hName = data?['name'];
+        hSname = data?['sname'];
+        hEmail = data?['email'];
+        hMob = data?['mobile'];
+        hrool = data?['rool'];
         profileImageUrl = data?['profileImageUrl'] ?? "";
       });
     }
@@ -172,21 +169,21 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> uploadImageToFirebase(XFile image) async {
     try {
-        setState(() {
-          isLoading = true; // Set loading flag to true
-        });
+      setState(() {
+        isLoading = true; // Set loading flag to true
+      });
       final storageRef = FirebaseStorage.instance.ref();
-      final fileName = "${sEnroll}.jpg"; // Save image with enrollment number and .jpg format
+      final fileName = "${hName+hSname}.jpg"; // Save image with enrollment number and .jpg format
       final imageRef = storageRef.child('profile/$fileName');
       await imageRef.putFile(File(image.path));
       final imageUrl = await imageRef.getDownloadURL();
-      await FirebaseFirestore.instance.collection('user').doc(uID).update({'profileImageUrl': imageUrl});
+      await FirebaseFirestore.instance.collection('user').doc(hID).update({'profileImageUrl': imageUrl});
       setState(() {
         profileImageUrl = imageUrl;
       });
-      Get.snackbar("Success", "Profile image updated successfully!");
+      Get.snackbar("Success", "Profile image updated successfully!",backgroundColor: Colors.green, colorText: Colors.white);
     } catch (error) {
-      Get.snackbar("Error", "Failed to update profile image: $error");
+      Get.snackbar("Error", "Failed to update profile image: $error",backgroundColor: Colors.red, colorText: Colors.white);
     }finally {
       setState(() {
         isLoading = false; // Always set loading flag to false, even on error
@@ -202,10 +199,14 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(onPressed: (){
+          if(hrool=="hod"){Get.off(HodScreen());}
+          else{Get.off(FacultyScreen());}
+        }, icon: Icon(Icons.arrow_back_rounded)),
         title: Text("Profile", style: TextStyle(color: muColor, fontSize: getSize(context, 2.3))),
         iconTheme: IconThemeData(color: muColor,),
         elevation: 1,
@@ -233,24 +234,25 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           ElevatedButton(
                             onPressed: () => Get.back(),
-                            child: Text('NO'),
+                            child: Text('NO',style: TextStyle(fontFamily: "Main",color: Colors.white,fontSize:getSize(context, 2),fontWeight: FontWeight.bold)),
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                              backgroundColor: Color(0xFF0098B5),
+                              backgroundColor: muColor,
                             ),
                           ),
                           SizedBox(width: getWidth(context, 0.05),),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                              backgroundColor: Color(0xFF0098B5),
+                              backgroundColor: muColor,
                             ),
                             onPressed: () async {
-                              await prefs.setBool("isLoginStd", false);
+                              await prefs.setBool("isLoginHod", false);
+                              await prefs.setBool("isLoginFac", false);
                               await prefs.setString("userID","");
                               Get.off(LoginPage(),curve: Curves.bounceInOut,duration: Duration(seconds: 1));
                             },
-                            child: Text('YES'),
+                            child: Text('YES',style: TextStyle(fontFamily: "Main",color: Colors.white,fontSize:getSize(context, 2),fontWeight: FontWeight.bold)),
                           ),
                         ],
                       ),
@@ -260,15 +262,17 @@ class _ProfilePageState extends State<ProfilePage> {
         }, icon: Icon(Icons.logout_rounded,color: muColor,))],
       ),
       body: SafeArea(
-        child: StreamBuilder(
-          stream: FirebaseOperations.fetchTransactions(),
-          builder: (context, Snapshot) {
-            return Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Center(
-                child: SingleChildScrollView(
+        child: SingleChildScrollView(
+          child: StreamBuilder(
+            stream: FirebaseOperations.fetchTransactions(),
+            builder: (context, Snapshot) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
+                      SizedBox(height: getSize(context, 3),),
                       Stack(
                         alignment: Alignment.center,
                         children: [
@@ -292,6 +296,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           isLoading ? CircularProgressIndicator(color: muColor,strokeWidth: 5,strokeAlign: getSize(context, 2.1),):SizedBox()
                         ],
                       ),
+                      SizedBox(height: getSize(context, 3),),
                       ElevatedButton(
                         onPressed: (){
                           pickImageFromGallery();
@@ -301,131 +306,71 @@ class _ProfilePageState extends State<ProfilePage> {
                             fixedSize: Size(180,15),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(getSize(context, 1.5))),
                             backgroundColor:muColor),),
-                      SizedBox(height: getSize(context, 2),),
+                      SizedBox(height: getSize(context, 10),),
                       Container(
                         width: getWidth(context, 0.9),
-                        height: getHeight(context, 0.8),
+                        height: getHeight(context, 0.35),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
                           color: Colors.grey[200],
                         ),
                         child: Padding(
-                            padding: const EdgeInsets.all(15.0),
-                            child: Column(
-                              children: [
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(text: "Name   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
-                                        TextSpan(text: "$sName $sSname", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
+                          padding: const EdgeInsets.all(15.0),
+                          child: Column(
+                            children: [
+                              Align(
+                                alignment: Alignment.topLeft,
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(text: "Name   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
+                                      TextSpan(text: "$hName $hSname", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
+                                    ],
                                   ),
                                 ),
-                                SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(text: "Semester   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
-                                        TextSpan(text: "$sSem", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
+                              ),
+                              SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
+                              Align(
+                                alignment: Alignment.topLeft,
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(text: "Email   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
+                                      TextSpan(text: "$hEmail", style: TextStyle(fontSize: getSize(context, 2),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
+                                    ],
                                   ),
                                 ),
-                                SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(text: "Class   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
-                                        TextSpan(text: "$sClass ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
+                              ),
+                              SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
+                              Align(
+                                alignment: Alignment.topLeft,
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(text: "Contact   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
+                                      TextSpan(text: "$hMob", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
+                                    ],
                                   ),
                                 ),
-                                SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(text: "Lab Batch   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
-                                        TextSpan(text: "$sLab", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(text: "Enrollment   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
-                                        TextSpan(text: "$sEnroll", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(text: "GR no.   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
-                                        TextSpan(text: "$sGR", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(text: "Email   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
-                                        TextSpan(text: "$sEmail", style: TextStyle(fontSize: getSize(context, 2),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
-                                Align(
-                                  alignment: Alignment.topLeft,
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(text: "Contact   :   ", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black)),
-                                        TextSpan(text: "$sMob", style: TextStyle(fontSize: getSize(context, 2.5),fontFamily: "main",color: Colors.black,fontWeight: FontWeight.bold)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
-                                ElevatedButton(
-                                    onPressed: (){updatePassword(context);},
-                                    child: Center(child: Text("Update Password")),
+                              ),
+                              SizedBox(height: getSize(context, 5),child: Divider(color: Colors.grey,thickness: 1)),
+                              ElevatedButton(
+                                onPressed: (){updatePassword(context);},
+                                child: Center(child: Text("Update Password",style: TextStyle(fontFamily: "Main",color: Colors.white))),
                                 style: ElevatedButton.styleFrom(
-                                  fixedSize: Size(200,20),
+                                    fixedSize: Size(200,20),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(getSize(context, 1.5))),
-                                  backgroundColor:muColor),),
-                              ],
-                            ),
+                                    backgroundColor:muColor),),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

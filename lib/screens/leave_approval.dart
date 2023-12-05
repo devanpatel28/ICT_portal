@@ -66,7 +66,7 @@ class _LeaveApprovalPageState extends State<LeaveApprovalPage> {
   }
   void _onApproveClick(LeaveApplication leave) async {
     await _firestore.collection('leave').doc(leave.id).update({'status': 'approve'});
-    _fetchLeaveApplications(); // Refresh list after update
+    _fetchLeaveApplications();
   }
 
   void _onDeclineClick(LeaveApplication leave) async {

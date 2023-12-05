@@ -8,21 +8,21 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../helpers/contents.dart';
 
-class AllStudentsPage extends StatefulWidget {
+class AllFaculty extends StatefulWidget {
   @override
-  State<AllStudentsPage> createState() => _AllStudentsPageState();
+  State<AllFaculty> createState() => _AllFacultyState();
 }
 
-class _AllStudentsPageState extends State<AllStudentsPage> {
+class _AllFacultyState extends State<AllFaculty> {
   final Stream<QuerySnapshot> _studentsStream =
-  FirebaseFirestore.instance.collection('user').where('rool', isEqualTo: "student").snapshots();
+  FirebaseFirestore.instance.collection('user').where('rool', isEqualTo: "faculty").snapshots();
   String _searchQuery = "";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: Colors.white),
-        title: Text('All Students',
+        title: Text('All Faculty',
             style: TextStyle(
                 fontSize: getSize(context, 2.5),
                 fontFamily: "main",
@@ -33,9 +33,9 @@ class _AllStudentsPageState extends State<AllStudentsPage> {
           Padding(
             padding: const EdgeInsets.all(15.0),
             child: TextField(
-                decoration: InputDecoration(hintText: 'Search by Name or Enrollment',hintStyle: TextStyle(fontFamily: "Main")),
-                onChanged: (value) => setState(() => _searchQuery = value),
-              ),
+              decoration: InputDecoration(hintText: 'Search by Name',hintStyle: TextStyle(fontFamily: "Main")),
+              onChanged: (value) => setState(() => _searchQuery = value),
+            ),
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
@@ -44,30 +44,25 @@ class _AllStudentsPageState extends State<AllStudentsPage> {
                 if (!snapshot.hasData) {
                   return Center(child: CircularProgressIndicator());
                 }
-                final students = snapshot.data!.docs;
+                final faculty = snapshot.data!.docs;
 
                 return ListView.builder(
-                  itemCount: students.length,
+                  itemCount: faculty.length,
                   itemBuilder: (context, index) {
-                    final student = students[index];
-                    final name = student['name'];
-                    final sname = student['sname'];
-                    final enroll = student['enroll'];
+                    final fact = faculty[index];
+                    final name = fact['name'];
+                    final sname = fact['sname'];
                     final fullname = "$name $sname";
-                    final clas = student['class'];
-                    final sem = student['sem'];
-                    final mobile = student['mobile'];
+                    final mobile = fact['mobile'];
 
                     if (!name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
                         !sname.toLowerCase().contains(_searchQuery.toLowerCase()) &&
-                        !fullname.toLowerCase().contains(_searchQuery.toLowerCase()) &&
-                        !enroll.contains(_searchQuery.toLowerCase())) {
+                        !fullname.toLowerCase().contains(_searchQuery.toLowerCase())) {
                       return SizedBox.shrink(); // Hide student if not matching
                     }
                     return Card(
                       child: ListTile(
                         title: Text('$name $sname',style: TextStyle(fontFamily: 'main',fontSize: getSize(context, 2))),
-                        subtitle: Text('$sem - $clas - $enroll',style: TextStyle(fontFamily: 'main',fontSize: getSize(context, 1.5))),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -91,8 +86,8 @@ class _AllStudentsPageState extends State<AllStudentsPage> {
                         onLongPress: () async {
                           await Get.dialog(
                             AlertDialog(
-                              title: Text('Delete Student',style: TextStyle(fontFamily: "Main")),
-                              content: Text('Are you sure you want to delete $name $sname ?',style: TextStyle(fontFamily: "Main")),
+                              title: Text('Delete Faculty',style: TextStyle(fontFamily: "Main")),
+                              content: Text('Are you sure you want to delete Prof. $name $sname ?',style: TextStyle(fontFamily: "Main")),
                               actions: [
                                 ElevatedButton(
                                   child: Text('Cancel',style: TextStyle(fontFamily: "Main",color: Colors.white)),
@@ -106,9 +101,9 @@ class _AllStudentsPageState extends State<AllStudentsPage> {
                                   child: Text('Delete',style: TextStyle(fontFamily: "Main",color: Colors.white)),
                                   onPressed: () async {
                                     Get.back();
-                                    await FirebaseFirestore.instance.collection('user').doc(student.id).delete();
+                                    await FirebaseFirestore.instance.collection('user').doc(fact.id).delete();
                                     Get.snackbar("Success", "Student deleted successfully!",
-                                        backgroundColor: Colors.green, colorText: Colors.white,);
+                                      backgroundColor: Colors.green, colorText: Colors.white,);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),

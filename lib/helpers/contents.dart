@@ -42,6 +42,21 @@ Future<String> addUser(String email, String password, String name, String sname,
     'sem': sem,
     'rool': rool,
   });
-
+  return uid; // return the user UID for future use
+}
+Future<String> addFaculty(String email, String password, String name, String sname, String mobile,String rool) async {
+  final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+    email: email,
+    password: password,
+  );
+  final uid = userCredential.user!.uid;
+  final userRef = FirebaseFirestore.instance.collection('user').doc(uid);
+  await userRef.set({
+    'name': name,
+    'sname': sname,
+    'mobile': mobile,
+    'email': email,
+    'rool': rool,
+  });
   return uid; // return the user UID for future use
 }

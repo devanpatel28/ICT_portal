@@ -2,16 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:ict/helpers/contents.dart';
+import 'package:ict/screens/interview_desk.dart';
 import 'package:ict/screens/leave_applicaion.dart';
-import 'package:ict/screens/profile.dart';
+import 'package:ict/screens/question.dart';
+import 'package:ict/screens/student_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../firebase/firebase_operation.dart';
 import '../helpers/size.dart';
-import '../login_page.dart';
 
 class StudentScreen extends StatefulWidget {
   const StudentScreen({super.key});
@@ -28,8 +30,7 @@ class _StudentScreenState extends State<StudentScreen> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-    });
+    setState(() {});
     initSharedPrefs();
   }
    String _getGreeting() {
@@ -75,7 +76,53 @@ class _StudentScreenState extends State<StudentScreen> {
   }
 
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () async {
+        final result = await Get.dialog(
+            AlertDialog(
+              shape: RoundedRectangleBorder(borderRadius:BorderRadius.circular(15) ),
+              title: Center(child: Row(
+                children: [
+                  Image(image: AssetImage("assets/icon/icon.png"),width: 35),
+                  SizedBox(width: getWidth(context, 0.05),),
+                  Text('Leave app',style: TextStyle(fontFamily: "Main",fontSize:getSize(context, 2.5),fontWeight: FontWeight.bold)),
+                ],
+              )),
+              content: Text("Are you sure want to leave?",style: TextStyle(fontFamily: "Main"),),
+              actions: <Widget>[
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => Get.back(),
+                          child: Text('NO',style: TextStyle(fontFamily: "Main",color: Colors.white,fontSize:getSize(context, 2),fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                            backgroundColor: muColor,
+                          ),
+                        ),
+                        SizedBox(width: getWidth(context, 0.05),),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                            backgroundColor: muColor,
+                          ),
+                          onPressed: () =>Get.off(SystemNavigator.pop(),curve: Curves.elasticOut,duration: Duration(seconds: 2)),
+                          child: Text('YES',style: TextStyle(fontFamily: "Main",color: Colors.white,fontSize:getSize(context, 2),fontWeight: FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),],
+            )
+        );
+        // Return true if user confirms leaving, false otherwise
+        return result;
+    },
+    child: Scaffold(
       appBar: AppBar(
         title: Text("Dashboard", style: TextStyle(color: muColor, fontSize: getSize(context, 2.3))),
         actions: [
@@ -173,22 +220,6 @@ class _StudentScreenState extends State<StudentScreen> {
                               ),"Profile",
                             ),
                             getMainIcon(
-                                context,
-                                IconButton(
-                                  onPressed: () {
-                                    Get.to(LeaveApplication());
-                                  },
-                                  icon: Icon(Icons.calendar_month_outlined,
-                                      size: getSize(context, 6),
-                                      color: muColor),
-                                ),"Timetable"),
-                          ],
-                        ),
-                        SizedBox(height: getHeight(context, 0.03)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            getMainIcon(
                               context,
                               IconButton(
                                 onPressed: () {
@@ -199,27 +230,34 @@ class _StudentScreenState extends State<StudentScreen> {
                               ),
                               "Notice Board",
                             ),
+                          ],
+                        ),
+                        SizedBox(height: getHeight(context, 0.03)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+
                             getMainIcon(
                                 context,
                                 IconButton(
                                   onPressed: () {
-                                    Get.to(LeaveApplication());
+                                    Get.to(QuizPage());
                                   },
                                   icon: Icon(Icons.quiz_outlined,
                                       size: getSize(context, 6),
                                       color: muColor),
                                 ),
-                                "Quiz"),
+                                "Questions\n     Bank"),
                             getMainIcon(
                               context,
                               IconButton(
                                 onPressed: () {
-                                  Get.to(LeaveApplication());
+                                  Get.to(InterviewDeskPage());
                                 },
                                 icon: Icon(Icons.fact_check_outlined,
                                     size: getSize(context, 6), color: muColor),
                               ),
-                              "Attendance",
+                              "Interview\n    Desk",
                             ),
                           ],
                         ),
@@ -232,6 +270,7 @@ class _StudentScreenState extends State<StudentScreen> {
           },
         ),
       ),
+    ),
     );
   }
 }
