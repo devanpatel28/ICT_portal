@@ -9,6 +9,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:ict/helpers/contents.dart';
 import 'package:ict/screens/interview_desk.dart';
 import 'package:ict/screens/leave_applicaion.dart';
+import 'package:ict/screens/notice_board.dart';
 import 'package:ict/screens/question.dart';
 import 'package:ict/screens/student_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -223,7 +224,7 @@ class _StudentScreenState extends State<StudentScreen> {
                               context,
                               IconButton(
                                 onPressed: () {
-                                  Get.to(LeaveApplication());
+                                  Get.to(NoticeBoard());
                                 },
                                 icon: Icon(Icons.developer_board_outlined,
                                     size: getSize(context, 6), color: muColor),

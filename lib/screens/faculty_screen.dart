@@ -9,6 +9,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:ict/helpers/contents.dart';
 import 'package:ict/screens/addStudent.dart';
 import 'package:ict/screens/all_Students.dart';
+import 'package:ict/screens/interview_desk.dart';
 import 'package:ict/screens/leave_applicaion.dart';
 import 'package:ict/screens/leave_approval.dart';
 import 'package:ict/screens/professor_profile.dart';
@@ -17,6 +18,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../firebase/firebase_operation.dart';
 import '../helpers/size.dart';
 import '../login_page.dart';
+import 'NoticeBoardEdit.dart';
+import 'all_faculty.dart';
 
 class FacultyScreen extends StatefulWidget {
   const FacultyScreen({super.key});
@@ -221,12 +224,12 @@ class _FacultyScreenState extends State<FacultyScreen> {
                                   context,
                                   IconButton(
                                     onPressed: () {
-                                      // Get.to(LeaveApplication());
+                                      Get.to(AllFaculty());
                                     },
-                                    icon: Icon(Icons.fact_check_outlined,
+                                    icon: Icon(Icons.people_alt_rounded,
                                         size: getSize(context, 6), color: muColor),
                                   ),
-                                  "Attendance",
+                                  "Faculty List",
                                 ),
                               ],
                             ),
@@ -248,12 +251,22 @@ class _FacultyScreenState extends State<FacultyScreen> {
                                     context,
                                     IconButton(
                                       onPressed: () {
-                                        // Get.to(LeaveApplication());
+                                        Get.to(InterviewDeskPage());
                                       },
-                                      icon: Icon(Icons.calendar_month_outlined,
+                                      icon: Icon(Icons.fact_check_outlined,
                                           size: getSize(context, 6),
                                           color: muColor),
-                                    ),"Timetable\n "),
+                                    ),"Interview\n     Desk"),
+                                getMainIcon(
+                                    context,
+                                    IconButton(
+                                      onPressed: () {
+                                        Get.to(NoticeBoardEdit());
+                                      },
+                                      icon: Icon(Icons.fact_check_outlined,
+                                          size: getSize(context, 6),
+                                          color: muColor),
+                                    ),"Noticeboard\n"),
                               ],
                             ),
                           ],

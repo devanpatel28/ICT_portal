@@ -79,11 +79,7 @@ class _AllStudentsPageState extends State<AllStudentsPage> {
                               icon: Icon(FontAwesomeIcons.whatsapp),
                               onPressed: () async {
                                 final url = 'https://wa.me/+91$mobile';
-                                if (await canLaunch(url)) {
                                   launch(url);
-                                } else {
-                                  Get.snackbar("Error",'WhatsApp not installed',backgroundColor: Colors.red,colorText: Colors.white);
-                                }
                               },
                             ),
                           ],

@@ -12,13 +12,16 @@ import 'package:ict/screens/addStudent.dart';
 import 'package:ict/screens/all_Students.dart';
 import 'package:ict/screens/leave_applicaion.dart';
 import 'package:ict/screens/leave_approval.dart';
+import 'package:ict/screens/notice_board.dart';
 import 'package:ict/screens/professor_profile.dart';
 import 'package:ict/screens/student_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../firebase/firebase_operation.dart';
 import '../helpers/size.dart';
 import '../login_page.dart';
+import 'NoticeBoardEdit.dart';
 import 'all_faculty.dart';
+import 'interview_desk.dart';
 
 class HodScreen extends StatefulWidget {
   const HodScreen({super.key});
@@ -269,6 +272,32 @@ class _HodScreenState extends State<HodScreen> {
                                     size: getSize(context, 5), color: muColor),
                               ),"My Profile",
                             ),
+                          ],
+                        ),
+                        SizedBox(height: getHeight(context, 0.03)),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            getMainIcon(
+                            context,
+                            IconButton(
+                              onPressed: () {
+                                Get.to(InterviewDeskPage());
+                              },
+                              icon: Icon(Icons.fact_check_outlined,
+                                  size: getSize(context, 6),
+                                  color: muColor),
+                            ),"Interview\n     Desk"),
+                            getMainIcon(
+                                context,
+                                IconButton(
+                                  onPressed: () {
+                                    Get.to(NoticeBoardEdit());
+                                  },
+                                  icon: Icon(Icons.fact_check_outlined,
+                                      size: getSize(context, 6),
+                                      color: muColor),
+                                ),"Noticeboard\n"),
                           ],
                         ),
                       ],

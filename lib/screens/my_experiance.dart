@@ -30,7 +30,7 @@ class _MyExperianceState extends State<MyExperiance> {
   }
 
   void _fetchLeaveApplications() async {
-    final leaveStream = _firestore.collection('interview').where('studentID', isEqualTo: user?.uid).snapshots();
+    final leaveStream = _firestore.collection('interview').snapshots();
     leaveStream.listen((snapshot) {
       _leaveApplications.clear();
       for (var doc in snapshot.docs) {
@@ -97,13 +97,42 @@ class _MyExperianceState extends State<MyExperiance> {
                                     ),
                                   )
                               ),
-                              SizedBox(height: 10),
-
                             ],
                           ),
+                          trailing: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () async => await Get.dialog(
+                          AlertDialog(
+                          title: Text('Delete Experiance',style: TextStyle(fontFamily: "Main")),
+                          content: Text('Are you sure you want to delete this Experiace ?',style: TextStyle(fontFamily: "Main")),
+                          actions: [
+                            ElevatedButton(
+                              child: Text('Cancel',style: TextStyle(fontFamily: "Main",color: Colors.white)),
+                              onPressed: Get.back,
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                                backgroundColor: muColor,
+                              ),
+                            ),
+                            ElevatedButton(
+                              child: Text('Delete',style: TextStyle(fontFamily: "Main",color: Colors.white)),
+                              onPressed: () async {
+                                Get.back();
+                                await FirebaseFirestore.instance.collection('interview').doc(intView.id).delete();
+                                Get.snackbar("Success", "Student deleted successfully!",
+                                  backgroundColor: Colors.green, colorText: Colors.white,);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                                backgroundColor: muColor,
+                              ),
+                            ),
+                          ],
+                        ),)
                         ),
                       ),
                     ),
+                    )
                   );
                 },);}
         ),

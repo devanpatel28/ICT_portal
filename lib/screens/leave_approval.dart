@@ -1,8 +1,10 @@
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:ict/helpers/size.dart';
-
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import '../helpers/contents.dart';
 
 class LeaveApprovalPage extends StatefulWidget {
@@ -25,7 +27,29 @@ class _LeaveApprovalPageState extends State<LeaveApprovalPage> {
     super.initState();
     _fetchLeaveApplications();
   }
+  Future<void> sendEmail(String studentName,String body,String email,String Des) async {
+    String username = 'devan.patel.ict@gmail.com'; // Your Gmail address
+    String password = 'yoje lden hssm gybo'; // Your Gmail password
+    String colorStyle = (Des == "APPROVED") ? "color: green;" : "color: red;";
+    final smtpServer = gmail(username, password);
+    final message = Message()
+      ..from = Address(username, 'ICT-MU') // Your name
+      ..recipients.add(email) // Recipient's email address
+      ..subject = 'Leave Approval'
+      ..html = '''
+      <h3><p>Hello, $studentName</p>
+      <p>Your Leave:</p>
+      <p><strong>$body</strong></p>
+      <p style="$colorStyle">$Des</p></h3>
+    ''';
 
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+    } catch (error) {
+      print('Error sending email: $error');
+    }
+  }
   void _fetchLeaveApplications() async {
     final leaveStream = _firestore.collection('leave').snapshots();
 
@@ -67,11 +91,13 @@ class _LeaveApprovalPageState extends State<LeaveApprovalPage> {
   void _onApproveClick(LeaveApplication leave) async {
     await _firestore.collection('leave').doc(leave.id).update({'status': 'approve'});
     _fetchLeaveApplications();
+    sendEmail(leave.studentName,leave.body,leave.studentEmail,"APPROVED");
   }
 
   void _onDeclineClick(LeaveApplication leave) async {
     await _firestore.collection('leave').doc(leave.id).update({'status': 'decline'});
-    _fetchLeaveApplications(); // Refresh list after update
+    _fetchLeaveApplications();
+    sendEmail(leave.studentName,leave.body,leave.studentEmail,"DECLINE");
   }
   void _showStudentNamePopup(LeaveApplication leave) {
     showDialog(
@@ -241,6 +267,7 @@ class LeaveApplication {
   final String id;
   final String studentName;
   final String studentID;
+  final String studentEmail;
   final String subject;
   final String body;
   final String date;
@@ -252,6 +279,7 @@ class LeaveApplication {
         studentName = doc['studentName'],
         subject = doc['subject'],
         studentID = doc['studentID'],
+        studentEmail = doc['studentEmail'],
         body = doc['body'],
         date = doc['timestamp'],
         status = doc['status'],

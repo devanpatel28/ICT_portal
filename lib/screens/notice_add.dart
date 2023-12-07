@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,21 +8,20 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:ict/helpers/contents.dart';
 import 'package:ict/helpers/size.dart';
+import 'package:ict/screens/NoticeBoardEdit.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'leave_history.dart';
 
-class LeaveApplication extends StatefulWidget {
-  const LeaveApplication({Key? key}) : super(key: key);
+class AddNotice extends StatefulWidget {
+  const AddNotice({Key? key}) : super(key: key);
 
   @override
-  _LeaveApplicationState createState() => _LeaveApplicationState();
+  _AddNoticeState createState() => _AddNoticeState();
 
   static fromFirestore(DocumentSnapshot<Object?> documentSnapshot) {}
-
 }
 
-class _LeaveApplicationState extends State<LeaveApplication> {
+class _AddNoticeState extends State<AddNotice> {
   // Form fields
   final _subjectController = TextEditingController();
   final _bodyController = TextEditingController();
@@ -31,13 +29,12 @@ class _LeaveApplicationState extends State<LeaveApplication> {
   bool _isLoadingImage = false;
   final user = FirebaseAuth.instance.currentUser;
   String studentName = "";
-  String studentEmail = "";
+
 
   // Firebase Storage reference
   final _storage = FirebaseStorage.instance;
   // Firestore reference
   final _firestore = FirebaseFirestore.instance;
-
 
   Future<void> submitApplication() async {
     if (user != null) {
@@ -47,28 +44,23 @@ class _LeaveApplicationState extends State<LeaveApplication> {
       if (docSnapshot.exists) {
         final Map<String, dynamic>? data = docSnapshot.data();
         studentName = "${data?['name']} ${data?['sname']}";
-        studentEmail = "${data?['studentEmail']}";
       }
     }
     // Validate form fields
-    if (_subjectController.text.isEmpty || _bodyController.text.isEmpty) {
+    if (_bodyController.text.isEmpty) {
       Get.snackbar("Error", "Please fill all required fields!",backgroundColor: Colors.red,colorText: Colors.white);
       return;
     }
     // Create new leave application document in Firestore
-    await _firestore.collection('leave').add({
-      'studentID':user?.uid,
-      'studentName': studentName,
-      'studentEmail':studentEmail,
-      'subject': _subjectController.text,
+    await _firestore.collection('noticeboard').add({
+      'sname': studentName,
       'body': _bodyController.text,
       'attachmentID': _attachmentID,
-      'status': 'pending',
-      'timestamp': "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
+      'datetime': "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year} ${DateTime.now().hour}:${DateTime.now().minute}",
     });
 
     Get.snackbar("Success", "Leave application submitted successfully!",backgroundColor: Colors.green,colorText: Colors.white);
-
+    Get.to(NoticeBoardEdit());
     // Reset form fields
     _subjectController.clear();
     _bodyController.clear();
@@ -92,7 +84,7 @@ class _LeaveApplicationState extends State<LeaveApplication> {
 
           // Store the download URL in the _attachmentID field
           setState(() {
-              _isLoadingImage = true;
+            _isLoadingImage = true;
             _attachmentID = downloadURL;
           });
         });
@@ -110,12 +102,7 @@ class _LeaveApplicationState extends State<LeaveApplication> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Leave Application"),
-        actions: [
-          IconButton(
-              onPressed: () => Get.to(LeaveHistoryPage()),
-              icon: Icon(Icons.history)),
-        ],
+        title: Text("Add New Notice"),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -124,19 +111,11 @@ class _LeaveApplicationState extends State<LeaveApplication> {
             children: [
               SizedBox(height: 20),
               TextField(
-                controller: _subjectController,
-                decoration: InputDecoration(
-                  labelText: "Subject",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 20),
-              TextField(
                 controller: _bodyController,
-                minLines: 5,
-                maxLines: 10,
+                minLines: 14,
+                maxLines: 25,
                 decoration: InputDecoration(
-                  labelText: "Reason for Leave",
+                  labelText: "Type Message",
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -176,7 +155,7 @@ class _LeaveApplicationState extends State<LeaveApplication> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: submitApplication,
-                child: Text("Submit Leave Application"),
+                child: Text("Send Notice"),
               ),
             ],
           ),

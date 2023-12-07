@@ -70,7 +70,7 @@ class _InterviewDeskPageState extends State<InterviewDeskPage> {
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: TextField(
-                decoration: InputDecoration(hintText: 'Search Student Name/Company Name'),
+                decoration: InputDecoration(hintText: 'Search by Student Name/Company Name'),
                 onChanged: (value) => setState(() => _searchQuery = value),
               ),
             ),
@@ -86,8 +86,8 @@ class _InterviewDeskPageState extends State<InterviewDeskPage> {
                       itemBuilder: (context, index) {
                         final intView = _leaveApplications[index];
                         if (!intView.studentName.toLowerCase().contains(_searchQuery.toLowerCase())&&
-                            !intView.studentName.toLowerCase().contains(_searchQuery.toLowerCase())) {
-                          return SizedBox.shrink(); // Hide student if not matching
+                            !intView.company.toLowerCase().contains(_searchQuery.toLowerCase())) {
+                          return SizedBox.shrink();
                         }
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 2,vertical: 3),
